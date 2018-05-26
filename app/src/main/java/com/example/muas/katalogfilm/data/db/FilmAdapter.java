@@ -41,7 +41,7 @@ public class FilmAdapter extends RecyclerView.Adapter<FilmAdapter.FilmMovieHolde
         String gambarFilm = films.get(position)
                 .getGambar_film();
         Glide.with(context)
-                .load("http://image.tmdb.org/t/p/w50/"+gambarFilm)
+                .load("http://image.tmdb.org/t/p/w185/"+gambarFilm)
                 .into(holder.imageFilm);
 
         holder.judulFilm

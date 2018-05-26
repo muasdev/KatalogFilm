@@ -2,6 +2,7 @@ package com.example.muas.katalogfilm;
 
 import android.app.ProgressDialog;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,8 +10,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.muas.katalogfilm.data.db.FetchDataFilm;
 import com.example.muas.katalogfilm.data.db.FilmAdapter;
 import com.example.muas.katalogfilm.data.db.model.Film;
 
@@ -43,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
             "https://api.themoviedb.org/3/search/movie?api_key=a91db70d304c21ebc5320b123953a915";
     final String PARAM_QUERY = "query";
 
-    FilmAdapter filmAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
         String cariFilm = edtCariFilm.getText()
                 .toString().trim();
+
 
         Uri uri = Uri
                 .parse(BASE_FILM_URI)
@@ -112,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                     JSONArray jsonArray = jsonObject
                             .getJSONArray("results");
 
-                    for (int i=0; i<jsonArray.length();i++){
+                    for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject objectFilm = jsonArray
                                 .getJSONObject(i);
 
@@ -154,4 +158,5 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 }
