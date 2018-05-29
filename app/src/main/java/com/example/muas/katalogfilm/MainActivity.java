@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,8 +23,20 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,7 +60,13 @@ public class MainActivity extends AppCompatActivity {
             "https://api.themoviedb.org/3/search/movie?api_key=a91db70d304c21ebc5320b123953a915";
     final String PARAM_QUERY = "query";
 
+    final String API_KEY =
+            "https://api.themoviedb.org/3/movie/popular?api_key=a91db70d304c21ebc5320b123953a915&language=en-US&page=1";
 
+
+    Calendar calendar;
+    SimpleDateFormat simpleDateFormat;
+    String Date;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,9 +77,15 @@ public class MainActivity extends AppCompatActivity {
 
         rvListFilm = (RecyclerView) findViewById(R.id.rv_list_film);
 
+
+        /*simpleDateFormat = new SimpleDateFormat("EEE");
+        Date = simpleDateFormat.format(calendar.getTime());*/
+
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
 
         rvListFilm.setLayoutManager(linearLayoutManager);
+
+        new getDataFilm().execute(API_KEY);
         ButterKnife.bind(this);
     }
 
@@ -157,6 +183,96 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    //bikin asynctask
+    private class getDataFilm extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            URL url = null;
+            try {
+                url = new URL(params[0]);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            try {
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
+                InputStream inputStream = urlConnection.getInputStream();
+
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                String s = bufferedReader.readLine();
+                bufferedReader.close();
+
+                return s;
+            } catch (IOException e) {
+                Log.e("Error: ", e.getMessage(), e);
+            }
+
+            return null;
+        }
+
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            JSONObject jsonObject = null;
+            try {
+
+                jsonObject = new JSONObject(s);
+
+                final ArrayList<Film> movieList = new ArrayList<>();
+                JSONArray jsonArray = jsonObject.getJSONArray("results");
+
+                for (int i = 0; i < jsonArray.length(); i++) {
+
+//Reading JSON object at 'i'th position of JSON Array
+                    JSONObject object = jsonArray.getJSONObject(i);
+
+
+                    /*calendar = Calendar.getInstance();
+                    GregorianCalendar hari = new GregorianCalendar(TimeZone.getTimeZone(waktu));
+                    int hariRilis = hari.get(calendar.DAY_OF_WEEK);
+                    String dayOfTheWeek = (String) DateFormat.format("EEE", hariRilis); // Thursday*/
+
+                    /*ubah format DATE waktu rilis film dari API*/
+                    simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    Date date1 = simpleDateFormat.parse(object.getString("release_date"));
+
+                    simpleDateFormat = new SimpleDateFormat("EEE, MMM d, yyyy");
+                    String output1 = simpleDateFormat.format(date1); //
+
+                    Film filmDetail = new Film();
+                    filmDetail.setOriginal_title(object.getString("original_title"));
+                    filmDetail.setOverview(object.getString("overview"));
+                    filmDetail.setRelease_date(output1);
+                    filmDetail.setGambar_film(object.getString("poster_path"));
+                    movieList.add(filmDetail);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            FilmAdapter filmAdapter = new
+                                    FilmAdapter(getApplicationContext(),
+                                    movieList);
+                            rvListFilm.setAdapter(filmAdapter);
+                        }
+                    });
+
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
+                Log.d("pesan error", "onPostExecute: gagal convert waktu");
+            }
+        }
     }
 
 }

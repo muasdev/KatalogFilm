@@ -13,12 +13,16 @@ import com.bumptech.glide.Glide;
 import com.example.muas.katalogfilm.R;
 import com.example.muas.katalogfilm.data.db.model.Film;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class FilmAdapter extends RecyclerView.Adapter<FilmAdapter.FilmMovieHolder> {
 
     private Context context;
     private ArrayList<Film> films;
+
+
 
     public FilmAdapter(Context context, ArrayList<Film> films) {
         this.context = context;
@@ -38,10 +42,19 @@ public class FilmAdapter extends RecyclerView.Adapter<FilmAdapter.FilmMovieHolde
     @Override
     public void onBindViewHolder(@NonNull FilmAdapter.FilmMovieHolder holder, int position) {
 
+        Calendar calendar;
+        SimpleDateFormat simpleDateFormat;
+        String Date;
+
+        calendar = Calendar.getInstance();
+        /*simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");*/
+        simpleDateFormat = new SimpleDateFormat("EEE");
+        Date = simpleDateFormat.format(calendar.getTime());
+
         String gambarFilm = films.get(position)
                 .getGambar_film();
         Glide.with(context)
-                .load("http://image.tmdb.org/t/p/w185/"+gambarFilm)
+                .load("http://image.tmdb.org/t/p/w500/"+gambarFilm)
                 .into(holder.imageFilm);
 
         holder.judulFilm
@@ -58,6 +71,7 @@ public class FilmAdapter extends RecyclerView.Adapter<FilmAdapter.FilmMovieHolde
                 .setText(films
                         .get(position)
                         .getRelease_date());
+
 
     }
 
@@ -81,4 +95,7 @@ public class FilmAdapter extends RecyclerView.Adapter<FilmAdapter.FilmMovieHolde
             release_date = (TextView) itemView.findViewById(R.id.tv_rilisFilm);
         }
     }
+
+
+
 }
